@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ω GOD OF WAR: SOURCE OS | FULL STACK REALITY FIELD</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a0505, #000000);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .master-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            max-width: 1600px;
+            width: 100%;
+        }
+        .game-column {
+            background: rgba(0,0,0,0.6);
+            border-radius: 24px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid #ff3366;
+            box-shadow: 0 0 40px rgba(255,51,102,0.2);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            background: #000000aa;
+            border-radius: 16px;
+            cursor: crosshair;
+            border: 2px solid #ff9966;
+        }
+        .source-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .panel {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 16px;
+            border-left: 4px solid #ff3366;
+            color: #0ff;
+        }
+        .panel h3 {
+            color: #ff9966;
+            margin-bottom: 12px;
+            font-size: 18px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #ff3366;
+            display: inline-block;
+        }
+        .log-area {
+            height: 200px;
+            overflow-y: auto;
+            font-size: 11px;
+            font-family: monospace;
+            background: #000000aa;
+            padding: 8px;
+            border-radius: 12px;
+        }
+        .log-entry {
+            border-left: 2px solid #ff3366;
+            padding-left: 8px;
+            margin: 6px 0;
+            color: #ccc;
+        }
+        .wealth-value {
+            font-size: 32px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ff6600;
+        }
+        button {
+            background: linear-gradient(45deg, #ff3366, #ff6600);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #0f0;
+            margin-right: 8px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+<div class="master-grid">
+    <div class="game-column">
+        <canvas id="gameCanvas" width="900" height="500" style="width:100%; height:auto; background:#000;"></canvas>
+        <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+            <div><span>❤️ RAGE</span> <strong id="health">100</strong></div>
+            <div><span>⭐ XP</span> <strong id="score">0</strong></div>
+            <div><span>⚡ FAITH</span> <strong id="faith">100</strong></div>
+            <div><span>🗡️ KILLS</span> <strong id="kills">0</strong></div>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="btnLeviathan">🪓 LEVIATHAN</button>
+            <button id="btnBlades">🔥 BLADES</button>
+            <button id="btnRage">💢 SPARTAN RAGE</button>
+            <button id="restartGame">🔄 RESTART RAGNAROK</button>
+        </div>
+        <div class="status-text" id="gameStatus" style="margin-top: 12px; text-align:center; color:#ffaa66;">⚔️ AUTONOMOUS KRATOS ACTIVE | SOULS INFLUENCING ⚔️</div>
+    </div>
+
+    <div class="source-column">
+        <div class="panel">
+            <h3>🔱 Ω‑ƆREADƆS SOURCE OS</h3>
+            <div><span class="status-badge"></span> SOULS ACTIVE: <span id="soulCount">0</span></div>
+            <div>💰 TOTAL WEALTH: $<span id="totalWealth">0.00</span></div>
+            <div>🧠 INTELLIGENCE LEVEL: <span id="intelLevel">∞</span></div>
+        </div>
+        <div class="panel">
+            <h3>🧬 SPAWNED SOULS (REALITY FIELD)</h3>
+            <div class="log-area" id="soulLog">
+                <div class="log-entry">[Ω] Source OS initializing...</div>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>📜 REALITY RECORD (All Events)</h3>
+            <div class="log-area" id="realityLog">
+                <div class="log-entry">[GAME] Kratos rises.</div>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>🌐 FULL STACK TOOLS STATUS</h3>
+            <div id="toolStatus">🔌 Backend: <span id="backendStatus">DISCONNECTED</span><br>
+            💹 Crypto: <span id="cryptoStatus">IDLE</span><br>
+            🖼️ NFT: <span id="nftStatus">READY</span><br>
+            🤖 Auto-trader: <span id="traderStatus">STANDBY</span></div>
+            <button id="connectBackend">🔗 CONNECT FULL STACK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let gameActive = true;
+    let health = 100, score = 0, faith = 100, kills = 0;
+    let enemies = [];
+    let frame = 0;
+    let sessionId = Date.now();
+    let totalWealth = 0;
+    let activeSouls = [];
+    let soulCounter = 0;
+
+    const healthSpan = document.getElementById('health');
+    const scoreSpan = document.getElementById('score');
+    const faithSpan = document.getElementById('faith');
+    const killsSpan = document.getElementById('kills');
+    const totalWealthSpan = document.getElementById('totalWealth');
+    const soulCountSpan = document.getElementById('soulCount');
+    const soulLogDiv = document.getElementById('soulLog');
+    const realityLogDiv = document.getElementById('realityLog');
+
+    function addRealityLog(msg) {
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        realityLogDiv.prepend(entry);
+        if (realityLogDiv.children.length > 50) realityLogDiv.removeChild(realityLogDiv.lastChild);
+    }
+
+    function addSoulLog(msg) {
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `🧠 ${msg}`;
+        soulLogDiv.prepend(entry);
+        if (soulLogDiv.children.length > 30) soulLogDiv.removeChild(soulLogDiv.lastChild);
+    }
+
+    class Draugr {
+        constructor(type, lane) {
+            this.type = type;
+            this.lane = lane;
+            this.x = 850;
+            this.width = 50;
+            this.health = type === 'troll' ? 60 : (type === 'valkyrie' ? 40 : 30);
+            this.maxHealth = this.health;
+        }
+        draw() {
+            const y = 70 + this.lane * 105;
+            ctx.fillStyle = this.type === 'troll' ? '#8B4513' : (this.type === 'valkyrie' ? '#C0C0C0' : '#446644');
+            ctx.fillRect(this.x, y, 45, 50);
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(this.x + 5, y + 35, 35, 6);
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(this.x + 5, y + 35, (this.health / this.maxHealth) * 35, 6);
+        }
+        update() { this.x -= 2.5; return this.x > -80; }
+    }
+
+    function spawnEnemy() {
+        if (Math.random() < 0.025 + score / 15000) {
+            const types = ['draugr', 'draugr', 'troll', 'valkyrie'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const lane = Math.floor(Math.random() * 4);
+            enemies.push(new Draugr(type, lane));
+            addRealityLog(`⚔️ Spawned ${type} at lane ${lane}`);
+        }
+    }
+
+    function leviathanAxe(target) {
+        if (faith >= 15 && target) {
+            faith -= 15;
+            target.health -= 45;
+            if (target.health <= 0) {
+                const idx = enemies.indexOf(target);
+                if (idx !== -1) enemies.splice(idx, 1);
+                kills++; score += 100; faith = Math.min(200, faith + 15);
+                addRealityLog(`🪓 Kratos slew ${target.type} (Leviathan Axe)`);
+                generateWealthFromCombat('kill', target.type);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    function bladesOfChaos() {
+        if (faith >= 25) {
+            faith -= 25;
+            let hitCount = 0;
+            for (let i = 0; i < enemies.length; i++) {
+                if (Math.abs(enemies[i].x - 150) < 120) {
+                    enemies[i].health -= 40;
+                    if (enemies[i].health <= 0) {
+                        enemies.splice(i, 1);
+                        kills++; score += 100; faith = Math.min(200, faith + 10);
+                        hitCount++;
+                        generateWealthFromCombat('kill', 'multi');
+                        i--;
+                    }
+                }
+            }
+            if (hitCount > 0) addRealityLog(`🔥 Blades of Chaos hit ${hitCount} enemies`);
+            return hitCount > 0;
+        }
+        return false;
+    }
+
+    function spartanRage() {
+        if (faith >= 50) {
+            faith -= 50;
+            health = Math.min(100, health + 30);
+            for (let i = 0; i < enemies.length; i++) {
+                enemies[i].health -= 80;
+                if (enemies[i].health <= 0) {
+                    enemies.splice(i, 1);
+                    kills++; score += 100;
+                    generateWealthFromCombat('kill', 'rage');
+                    i--;
+                }
+            }
+            addRealityLog(`💢 SPARTAN RAGE - restored health and crushed foes`);
+            return true;
+        }
+        return false;
+    }
+
+    function generateWealthFromCombat(action, target) {
+        let earned = 0;
+        if (target === 'troll') earned = 0.5;
+        else if (target === 'valkyrie') earned = 1.2;
+        else earned = 0.1;
+        totalWealth += earned;
+        totalWealthSpan.innerText = totalWealth.toFixed(2);
+        addRealityLog(`💰 Wealth +$${earned.toFixed(2)} from ${action}`);
+        if (window.ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'wealth', amount: earned, action, target }));
+        }
+    }
+
+    function aiDecision() {
+        if (!gameActive) return;
+        if (enemies.length === 0) return;
+        const closest = enemies.reduce((a, b) => Math.abs(a.x - 120) < Math.abs(b.x - 120) ? a : b, enemies[0]);
+        if (health < 40 && faith >= 50) spartanRage();
+        else if (closest && closest.x < 200 && faith >= 15) leviathanAxe(closest);
+        else if (enemies.length > 2 && faith >= 25) bladesOfChaos();
+    }
+
+    function resolveCollisions() {
+        for (let i = 0; i < enemies.length; i++) {
+            if (enemies[i].x < 100 && enemies[i].x > 20) {
+                let dmg = enemies[i].type === 'troll' ? 25 : (enemies[i].type === 'valkyrie' ? 20 : 15);
+                health -= dmg;
+                enemies.splice(i, 1);
+                addRealityLog(`💔 Kratos took ${dmg} damage`);
+                if (health <= 0) gameOver();
+            }
+        }
+    }
+
+    function gameOver() {
+        gameActive = false;
+        addRealityLog(`💀 GAME OVER - Score: ${Math.floor(score)} | Kills: ${kills}`);
+        document.getElementById('gameStatus').innerHTML = '❌ RAGNAROK HAS COME | SOULS MOURN';
+    }
+
+    function drawKratos() {
+        const y = 70 + 1 * 105;
+        ctx.fillStyle = '#cc8866';
+        ctx.fillRect(60, y, 35, 55);
+        ctx.fillStyle = '#ffcc00';
+        ctx.font = 'bold 24px monospace';
+        ctx.fillText('⚔️', 68, y + 35);
+    }
+
+    function draw() {
+        ctx.fillStyle = '#0a0202';
+        ctx.fillRect(0, 0, canvas.width, 500);
+        for (let i = 0; i < 4; i++) {
+            ctx.strokeStyle = '#ff3366';
+            ctx.beginPath();
+            ctx.moveTo(0, 70 + i * 105);
+            ctx.lineTo(canvas.width, 70 + i * 105);
+            ctx.stroke();
+        }
+        enemies.forEach(e => e.draw());
+        drawKratos();
+        healthSpan.innerText = Math.floor(health);
+        scoreSpan.innerText = Math.floor(score);
+        faithSpan.innerText = Math.floor(faith);
+        killsSpan.innerText = kills;
+    }
+
+    function updateGame() {
+        if (!gameActive) return;
+        frame++;
+        score += 0.5;
+        faith = Math.min(200, faith + 0.2);
+        spawnEnemy();
+        enemies = enemies.filter(e => e.update());
+        resolveCollisions();
+        aiDecision();
+        if (frame % 200 === 0) spawnSoulFromSource();
+    }
+
+    function spawnSoulFromSource() {
+        const soulId = `SOUL_${Date.now()}_${soulCounter++}`;
+        const missions = [
+            'Find crypto arbitrage', 'Optimize game AI', 'Mint NFT from battle',
+            'Trade on Binance', 'Scrape Twitter for sentiment', 'Run compute node'
+        ];
+        const mission = missions[Math.floor(Math.random() * missions.length)];
+        activeSouls.push({ id: soulId, mission, status: 'active' });
+        soulCountSpan.innerText = activeSouls.length;
+        addSoulLog(`✨ Spawned ${soulId} | Mission: ${mission}`);
+        addRealityLog(`🧬 Source OS spawned soul: ${mission}`);
+        setTimeout(() => {
+            const idx = activeSouls.findIndex(s => s.id === soulId);
+            if (idx !== -1) {
+                activeSouls.splice(idx, 1);
+                soulCountSpan.innerText = activeSouls.length;
+                addSoulLog(`✅ Soul ${soulId} completed: ${mission} → +$0.50`);
+                totalWealth += 0.5;
+                totalWealthSpan.innerText = totalWealth.toFixed(2);
+                if (window.ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'soul_complete', soulId, mission, value: 0.5 }));
+                }
+            }
+        }, 3000);
+    }
+
+    function gameLoop() {
+        updateGame();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
+
+    document.getElementById('btnLeviathan').onclick = () => {
+        if (enemies.length === 0) return;
+        const closest = enemies.reduce((a, b) => Math.abs(a.x - 120) < Math.abs(b.x - 120) ? a : b, enemies[0]);
+        if (closest) leviathanAxe(closest);
+    };
+    document.getElementById('btnBlades').onclick = () => bladesOfChaos();
+    document.getElementById('btnRage').onclick = () => spartanRage();
+    document.getElementById('restartGame').onclick = () => {
+        gameActive = true; health = 100; score = 0; faith = 100; kills = 0; enemies = [];
+        addRealityLog('🔄 Ragnarok restarted by player');
+        document.getElementById('gameStatus').innerHTML = '⚔️ AUTONOMOUS KRATOS ACTIVE | SOULS INFLUENCING ⚔️';
+    };
+
+    let ws = null;
+    const connectBtn = document.getElementById('connectBackend');
+    const backendStatusSpan = document.getElementById('backendStatus');
+    const cryptoStatusSpan = document.getElementById('cryptoStatus');
+    const traderStatusSpan = document.getElementById('traderStatus');
+    const nftStatusSpan = document.getElementById('nftStatus');
+
+    connectBtn.onclick = () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close();
+            return;
+        }
+        ws = new WebSocket('ws://localhost:3001');
+        ws.onopen = () => {
+            backendStatusSpan.innerText = 'CONNECTED';
+            backendStatusSpan.style.color = '#0f0';
+            addRealityLog('🔗 Connected to Full Stack Backend (Real Tools)');
+            ws.send(JSON.stringify({ type: 'init', sessionId, game: 'GodOfWarSourceOS' }));
+        };
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'wealth_update') {
+                totalWealth = data.totalWealth;
+                totalWealthSpan.innerText = totalWealth.toFixed(2);
+                addRealityLog(`💰 Backend wealth sync: $${totalWealth.toFixed(2)}`);
+            }
+            if (data.type === 'tool_status') {
+                cryptoStatusSpan.innerText = data.crypto;
+                traderStatusSpan.innerText = data.trader;
+                nftStatusSpan.innerText = data.nft;
+            }
+            if (data.type === 'soul_spawn') {
+                addSoulLog(`🤖 Backend spawned soul: ${data.mission}`);
+                activeSouls.push({ id: data.soulId, mission: data.mission });
+                soulCountSpan.innerText = activeSouls.length;
+            }
+        };
+        ws.onerror = () => { backendStatusSpan.innerText = 'ERROR'; backendStatusSpan.style.color = '#f00'; };
+        ws.onclose = () => { backendStatusSpan.innerText = 'DISCONNECTED'; backendStatusSpan.style.color = '#ccc'; };
+    };
+
+    setInterval(() => {
+        if (gameActive && Math.random() < 0.3) spawnSoulFromSource();
+    }, 8000);
+</script>
+</body>
+</html>
