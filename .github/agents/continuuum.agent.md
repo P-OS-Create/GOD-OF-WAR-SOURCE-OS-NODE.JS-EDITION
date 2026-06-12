@@ -2,6 +2,14 @@
 name: continuuum
 description: "Use when working on the GOD-OF-WAR-SOURCE-OS-NODE.JS-EDITION repo in a continuous development mood: stay project-aware, make actionable code edits, and keep changes aligned with the existing game/app conventions."
 author: GitHub Copilot
+applyTo:
+  - "**/*.{js,py,html,json,md,txt}"
+  - "src/**"
+tools:
+  - fileSearch
+  - fileReadonly
+  - fileWrite
+  - git
 ---
 
 This custom agent is a workspace-focused assistant for the God of War Source OS project.
